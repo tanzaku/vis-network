@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <title>Vis Network | Layouts | Hierarchical Layout</title>
 
@@ -30,11 +31,64 @@
             }
         }
 
+        class Random {
+            constructor(seed = 42) {
+                this.x = seed;
+            }
+
+            random() {
+                this.x = (this.x * 3319 + 2917) % 3571;
+                return this.x;
+            }
+        }
+
+        function gen(numNode) {
+            let rng = new Random();
+            let nodes = [];
+            let edges = [];
+            for (let i = 0; i < numNode; i++) {
+                nodes.push({ id: i, label: i.toString() });
+            }
+            const maxLevel = 6;
+            let currentMaxLevel = 0;
+            let levels = [];
+            for (let i = 0; i <= maxLevel; i++) {
+                levels.push([]);
+            }
+            levels[0].push(0);
+            nodes[0].level = 0;
+            for (let i = 1; i < numNode; i++) {
+                const numEdgeFromCurrentNode = (rng.random() % 3 === 0 ? 1 : 0) + 1;
+                let hash = {};
+                let maxParentLevel = 0;
+                for (let j = 0; j < numEdgeFromCurrentNode; j++) {
+                    // const parent = Math.floor(Math.random() * i);
+                    const parentLevel = rng.random() % Math.min(maxLevel, currentMaxLevel + 1);
+                    const parentId = levels[parentLevel][rng.random() % levels[parentLevel].length];
+                    if (!(parentId in hash)) {
+                        hash[parentId] = true;
+                        maxParentLevel = Math.max(maxParentLevel, parentLevel);
+                        edges.push({
+                            from: parentId,
+                            to: i
+                        });
+                    }
+                }
+                nodes[i].level = maxParentLevel + 1;
+                levels[maxParentLevel + 1].push(i);
+                currentMaxLevel = Math.max(currentMaxLevel, maxParentLevel + 1);
+            }
+            return {
+                nodes: nodes,
+                edges: edges
+            }
+        }
+
         function draw() {
             destroy();
             // randomly create some nodes and edges
             var nodeCount = document.getElementById('nodeCount').value;
-            var data = getScaleFreeNetwork(nodeCount)
+            var data = gen(nodeCount)
 
             // create a network
             var container = document.getElementById('mynetwork');
@@ -55,58 +109,60 @@
         }
 
     </script>
-    
+
 </head>
 
 <body onload="draw();">
-<h2>Hierarchical Layout - Scale-Free-Network</h2>
+    <h2>Hierarchical Layout - Scale-Free-Network</h2>
 
-<div style="width:700px; font-size:14px; text-align: justify;">
-    This example shows the randomly generated <b>scale-free-network</b> set of nodes and connected edges from example 2.
-    In this example, hierarchical layout has been enabled and the vertical levels are determined automatically.
-</div>
-<br/>
+    <div style="width:700px; font-size:14px; text-align: justify;">
+        This example shows the randomly generated <b>scale-free-network</b> set of nodes and connected edges from
+        example 2.
+        In this example, hierarchical layout has been enabled and the vertical levels are determined automatically.
+    </div>
+    <br />
 
-<form onsubmit="draw(); return false;">
-    <label for="nodeCount">Number of nodes:</label>
-    <input id="nodeCount" type="text" value="25" style="width: 50px;">
-    <input type="submit" value="Go">
-</form>
-<p>
-    <input type="button" id="btn-UD" value="Up-Down">
-    <input type="button" id="btn-DU" value="Down-Up">
-    <input type="button" id="btn-LR" value="Left-Right">
-    <input type="button" id="btn-RL" value="Right-Left">
-    <input type="hidden" id='direction' value="UD">
-</p>
+    <form onsubmit="draw(); return false;">
+        <label for="nodeCount">Number of nodes:</label>
+        <input id="nodeCount" type="text" value="25" style="width: 50px;">
+        <input type="submit" value="Go">
+    </form>
+    <p>
+        <input type="button" id="btn-UD" value="Up-Down">
+        <input type="button" id="btn-DU" value="Down-Up">
+        <input type="button" id="btn-LR" value="Left-Right">
+        <input type="button" id="btn-RL" value="Right-Left">
+        <input type="hidden" id='direction' value="UD">
+    </p>
 
-<script language="javascript">
-    var directionInput = document.getElementById("direction");
-    var btnUD = document.getElementById("btn-UD");
-    btnUD.onclick = function () {
-        directionInput.value = "UD";
-        draw();
-    }
-    var btnDU = document.getElementById("btn-DU");
-    btnDU.onclick = function () {
-        directionInput.value = "DU";
-        draw();
-    };
-    var btnLR = document.getElementById("btn-LR");
-    btnLR.onclick = function () {
-        directionInput.value = "LR";
-        draw();
-    };
-    var btnRL = document.getElementById("btn-RL");
-    btnRL.onclick = function () {
-        directionInput.value = "RL";
-        draw();
-    };
-</script>
-<br>
+    <script language="javascript">
+        var directionInput = document.getElementById("direction");
+        var btnUD = document.getElementById("btn-UD");
+        btnUD.onclick = function () {
+            directionInput.value = "UD";
+            draw();
+        }
+        var btnDU = document.getElementById("btn-DU");
+        btnDU.onclick = function () {
+            directionInput.value = "DU";
+            draw();
+        };
+        var btnLR = document.getElementById("btn-LR");
+        btnLR.onclick = function () {
+            directionInput.value = "LR";
+            draw();
+        };
+        var btnRL = document.getElementById("btn-RL");
+        btnRL.onclick = function () {
+            directionInput.value = "RL";
+            draw();
+        };
+    </script>
+    <br>
 
-<div id="mynetwork"></div>
+    <div id="mynetwork"></div>
 
-<p id="selection"></p>
+    <p id="selection"></p>
 </body>
+
 </html>
