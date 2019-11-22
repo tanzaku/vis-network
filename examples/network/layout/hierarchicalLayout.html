@@ -94,6 +94,9 @@
             var container = document.getElementById('mynetwork');
             var directionInput = document.getElementById("direction").value;
             var options = {
+                physics: {
+                    enabled: false
+                },
                 layout: {
                     hierarchical: {
                         direction: directionInput
